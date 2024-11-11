@@ -47,7 +47,7 @@ class AirtonClimate : public climate_ir::ClimateIR {
 
  protected:
   // Save the previous operation mode globally
-  uint8_t previous_mode;
+  uint8_t previous_mode_;
 
   // IR transmission payload builder
   void transmit_state() override;
@@ -59,12 +59,12 @@ class AirtonClimate : public climate_ir::ClimateIR {
   uint8_t swing_mode_();
   uint8_t operation_settings_();
 
-  uint8_t sumBytes_(const uint8_t *const start, const uint16_t length);
+  uint8_t sum_bytes_(const uint8_t *start, uint16_t length);
   uint8_t checksum_(const uint8_t *r_state);
 
   // IR receiver buffer
   bool on_receive(remote_base::RemoteReceiveData data) override;
-  bool parse_state_frame_(const uint8_t frame[]);
+  bool parse_state_frame_(uint8_t frame[]);
 };
 
 }  // namespace airton

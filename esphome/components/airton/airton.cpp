@@ -5,7 +5,7 @@ namespace esphome {
 namespace airton {
 
 static const char *const TAG = "airton.climate";
-uint8_t previous_mode = 0;
+uint8_t previous_mode_ = 0;
 
 void AirtonClimate::transmit_state() {
   // Sampled valid state
@@ -81,9 +81,9 @@ uint8_t AirtonClimate::operation_mode_() {
       break;
     case climate::CLIMATE_MODE_OFF:
     default:
-      operating_mode = 0b0111 & this->previous_mode;  // Set previous mode with power state bit off
+      operating_mode = 0b0111 & this->previous_mode_;  // Set previous mode with power state bit off
   }
-  this->previous_mode = operating_mode;
+  this->previous_mode_ = operating_mode;
   return operating_mode;
 }
 
@@ -107,7 +107,7 @@ uint16_t AirtonClimate::fan_speed_() {
 }
 
 bool AirtonClimate::turbo_control_() {
-  bool turbo_control = 0;  // My remote seems to always have this set to 0
+  bool turbo_control = false;  // My remote seems to always have this set to 0
   return turbo_control;
 }
 
@@ -148,7 +148,7 @@ uint8_t AirtonClimate::operation_settings_() {
 }
 
 // From IRutils.h of IRremoteESP8266 library
-uint8_t AirtonClimate::sumBytes_(const uint8_t *const start, const uint16_t length) {
+uint8_t AirtonClimate::sum_bytes_(const uint8_t *const start, const uint16_t length) {
   uint8_t checksum = 0;
   const uint8_t *ptr;
   for (ptr = start; ptr - start < length; ptr++)
@@ -157,11 +157,11 @@ uint8_t AirtonClimate::sumBytes_(const uint8_t *const start, const uint16_t leng
 }
 // From IRutils.h of IRremoteESP8266 library
 uint8_t AirtonClimate::checksum_(const uint8_t *r_state) {
-  uint8_t checksum = (uint8_t) (0x7F - this->sumBytes_(r_state, 6)) ^ 0x2C;
+  uint8_t checksum = (uint8_t) (0x7F - this->sum_bytes_(r_state, 6)) ^ 0x2C;
   return checksum;
 }
 
-bool AirtonClimate::parse_state_frame_(const uint8_t frame[]) {
+bool AirtonClimate::parse_state_frame_(uint8_t frame[]) {
   uint8_t mode = frame[2];
   if (mode & 0b00001000) {        // Check if power state bit is set
     switch (mode & 0b00000111) {  // Mask anything but the least significant 3 bits
