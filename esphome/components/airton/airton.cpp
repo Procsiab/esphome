@@ -5,7 +5,10 @@ namespace esphome {
 namespace airton {
 
 static const char *const TAG = "airton.climate";
-uint8_t previous_mode_ = 0;
+
+uint8_t AirtonClimate::get_previous_mode_() { return previous_mode_; }
+
+void AirtonClimate::set_previous_mode_(uint8_t mode) { previous_mode_ = mode; }
 
 void AirtonClimate::transmit_state() {
   // Sampled valid state
@@ -81,9 +84,9 @@ uint8_t AirtonClimate::operation_mode_() {
       break;
     case climate::CLIMATE_MODE_OFF:
     default:
-      operating_mode = 0b0111 & this->previous_mode_;  // Set previous mode with power state bit off
+      operating_mode = 0b0111 & this->get_previous_mode_();  // Set previous mode with power state bit off
   }
-  this->previous_mode_ = operating_mode;
+  this->set_previous_mode_(operating_mode);
   return operating_mode;
 }
 
@@ -161,7 +164,7 @@ uint8_t AirtonClimate::checksum_(const uint8_t *r_state) {
   return checksum;
 }
 
-bool AirtonClimate::parse_state_frame_(uint8_t frame[]) {
+bool AirtonClimate::parse_state_frame_(uint8_t const frame[]) {
   uint8_t mode = frame[2];
   if (mode & 0b00001000) {        // Check if power state bit is set
     switch (mode & 0b00000111) {  // Mask anything but the least significant 3 bits

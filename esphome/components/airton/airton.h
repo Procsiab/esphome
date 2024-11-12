@@ -45,9 +45,13 @@ class AirtonClimate : public climate_ir::ClimateIR {
                                climate::CLIMATE_FAN_HIGH},
                               {climate::CLIMATE_SWING_OFF, climate::CLIMATE_SWING_VERTICAL}) {}
 
- protected:
-  // Save the previous operation mode globally
+ private:
+  // Save the previous operation mode inside instance
   uint8_t previous_mode_;
+
+ protected:
+  uint8_t get_previous_mode_();
+  void set_previous_mode_(uint8_t mode);
 
   // IR transmission payload builder
   void transmit_state() override;
@@ -64,7 +68,7 @@ class AirtonClimate : public climate_ir::ClimateIR {
 
   // IR receiver buffer
   bool on_receive(remote_base::RemoteReceiveData data) override;
-  bool parse_state_frame_(uint8_t frame[]);
+  bool parse_state_frame_(uint8_t const frame[]);
 };
 
 }  // namespace airton
