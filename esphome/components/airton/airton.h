@@ -2,6 +2,10 @@
 
 #include "esphome/components/climate_ir/climate_ir.h"
 
+#ifdef USE_SWITCH
+#include "esphome/components/switch/switch.h"
+#endif
+
 namespace esphome {
 namespace airton {
 
@@ -37,13 +41,32 @@ const uint32_t AIRTON_MESSAGE_SPACE = 100000;
 // State Frame size
 const uint8_t AIRTON_STATE_FRAME_SIZE = 7;
 
+// Specific internal unit settings
+struct AirtonSettings {
+  bool sleep_state;
+  bool display_state;
+};
+
 class AirtonClimate : public climate_ir::ClimateIR {
+#ifdef USE_SWITCH
+ public:
+  void set_sleep_switch(switch_::Switch *sw);
+  void set_display_switch(switch_::Switch *sw);
+
+ protected:
+  switch_::Switch *sleep_switch_{nullptr};
+  switch_::Switch *display_switch_{nullptr};
+#endif
  public:
   AirtonClimate()
       : climate_ir::ClimateIR(AIRTON_TEMP_MIN, AIRTON_TEMP_MAX, 1.0f, true, true,
                               {climate::CLIMATE_FAN_AUTO, climate::CLIMATE_FAN_LOW, climate::CLIMATE_FAN_MEDIUM,
                                climate::CLIMATE_FAN_HIGH},
                               {climate::CLIMATE_SWING_OFF, climate::CLIMATE_SWING_VERTICAL}) {}
+  void set_sleep_state(bool state);
+  bool get_sleep_state() const;
+  void set_display_state(bool state);
+  bool get_display_state() const;
 
  private:
   // Save the previous operation mode inside instance
@@ -52,6 +75,8 @@ class AirtonClimate : public climate_ir::ClimateIR {
  protected:
   uint8_t get_previous_mode_();
   void set_previous_mode_(uint8_t mode);
+  AirtonSettings settings_;
+  ESPPreferenceObject airton_rtc_;
 
   // IR transmission payload builder
   void transmit_state() override;

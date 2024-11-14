@@ -6,6 +6,45 @@ namespace airton {
 
 static const char *const TAG = "airton.climate";
 
+void AirtonClimate::set_sleep_state(bool state) {
+  if (state != this->settings_.sleep_state) {
+    this->settings_.sleep_state = state;
+#ifdef USE_SWITCH
+    this->sleep_switch_->publish_state(state);
+#endif
+    this->airton_rtc_.save(&this->settings_);
+  }
+}
+
+bool AirtonClimate::get_sleep_state() const { return this->settings_.sleep_state; }
+
+void AirtonClimate::set_display_state(bool state) {
+  if (state != this->settings_.display_state) {
+    this->settings_.display_state = state;
+#ifdef USE_SWITCH
+    this->display_switch_->publish_state(state);
+#endif
+    this->airton_rtc_.save(&this->settings_);
+  }
+}
+
+bool AirtonClimate::get_display_state() const { return this->settings_.display_state; }
+
+#ifdef USE_SWITCH
+void AirtonClimate::set_sleep_switch(switch_::Switch *sw) {
+  this->sleep_switch_ = sw;
+  if (this->sleep_switch_ != nullptr) {
+    this->sleep_switch_->publish_state(this->get_sleep_state());
+  }
+}
+void AirtonClimate::set_display_switch(switch_::Switch *sw) {
+  this->display_switch_ = sw;
+  if (this->display_switch_ != nullptr) {
+    this->display_switch_->publish_state(this->get_display_state());
+  }
+}
+#endif  // USE_SWITCH
+
 uint8_t AirtonClimate::get_previous_mode_() { return previous_mode_; }
 
 void AirtonClimate::set_previous_mode_(uint8_t mode) { previous_mode_ = mode; }
@@ -115,7 +154,6 @@ bool AirtonClimate::turbo_control_() {
 }
 
 uint8_t AirtonClimate::temperature_() {
-  // Force 20C degrees in Fan only mode
   switch (this->mode) {
     case climate::CLIMATE_MODE_HEAT_COOL:
       // Fixed 25C setpoint in Auto mode
@@ -146,7 +184,13 @@ uint8_t AirtonClimate::operation_settings_() {
   if (this->mode == climate::CLIMATE_MODE_HEAT) {  // Set heating bit if on the corresponding mode
     settings |= (1 << 4);
   }
-  settings |= 0b11000100;  // Set Light, Health and NotAutoOn bits as per default
+  if (this->get_display_state()) {  // Set LED display
+    settings |= (1 << 7);
+  }
+  if (this->get_sleep_state()) {  // Set sleep mode
+    settings |= (1 << 1);
+  }
+  settings |= 0b01000100;  // Set Health and NotAutoOn bits as per default
   return settings;
 }
 
@@ -216,6 +260,12 @@ bool AirtonClimate::parse_state_frame_(uint8_t const frame[]) {
       this->fan_mode = climate::CLIMATE_FAN_AUTO;
       break;
   }
+
+  uint8_t display_light = frame[5] & 0b10000000;  // Mask anything but the MSB
+  this->set_display_state(display_light != 0);
+
+  uint8_t sleep_mode = frame[5] & 0b00000010;  // Mask anything but the second bit
+  this->set_sleep_state(sleep_mode != 0);
 
   this->publish_state();
   return true;

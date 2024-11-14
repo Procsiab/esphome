@@ -23,3 +23,10 @@ sensor:
   - platform: template
     id: airton_sensor
     lambda: "return 21;"
+
+switch:
+  - platform: airton
+    sleep:
+      name: "sleep mode"
+    display:
+      name: "display light"
