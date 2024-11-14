@@ -50,11 +50,11 @@ struct AirtonSettings {
 class AirtonClimate : public climate_ir::ClimateIR {
 #ifdef USE_SWITCH
  public:
-  void set_sleep_switch(switch_::Switch *sw);
+  void set_sleep_mode_switch(switch_::Switch *sw);
   void set_display_switch(switch_::Switch *sw);
 
  protected:
-  switch_::Switch *sleep_switch_{nullptr};
+  switch_::Switch *sleep_mode_switch_{nullptr};
   switch_::Switch *display_switch_{nullptr};
 #endif
  public:
@@ -63,8 +63,8 @@ class AirtonClimate : public climate_ir::ClimateIR {
                               {climate::CLIMATE_FAN_AUTO, climate::CLIMATE_FAN_LOW, climate::CLIMATE_FAN_MEDIUM,
                                climate::CLIMATE_FAN_HIGH},
                               {climate::CLIMATE_SWING_OFF, climate::CLIMATE_SWING_VERTICAL}) {}
-  void set_sleep_state(bool state);
-  bool get_sleep_state() const;
+  void set_sleep_mode_state(bool state);
+  bool get_sleep_mode_state() const;
   void set_display_state(bool state);
   bool get_display_state() const;
 

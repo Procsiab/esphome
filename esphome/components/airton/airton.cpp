@@ -6,17 +6,17 @@ namespace airton {
 
 static const char *const TAG = "airton.climate";
 
-void AirtonClimate::set_sleep_state(bool state) {
+void AirtonClimate::set_sleep_mode_state(bool state) {
   if (state != this->settings_.sleep_state) {
     this->settings_.sleep_state = state;
 #ifdef USE_SWITCH
-    this->sleep_switch_->publish_state(state);
+    this->sleep_mode_switch_->publish_state(state);
 #endif
     this->airton_rtc_.save(&this->settings_);
   }
 }
 
-bool AirtonClimate::get_sleep_state() const { return this->settings_.sleep_state; }
+bool AirtonClimate::get_sleep_mode_state() const { return this->settings_.sleep_state; }
 
 void AirtonClimate::set_display_state(bool state) {
   if (state != this->settings_.display_state) {
@@ -31,10 +31,10 @@ void AirtonClimate::set_display_state(bool state) {
 bool AirtonClimate::get_display_state() const { return this->settings_.display_state; }
 
 #ifdef USE_SWITCH
-void AirtonClimate::set_sleep_switch(switch_::Switch *sw) {
-  this->sleep_switch_ = sw;
-  if (this->sleep_switch_ != nullptr) {
-    this->sleep_switch_->publish_state(this->get_sleep_state());
+void AirtonClimate::set_sleep_mode_switch(switch_::Switch *sw) {
+  this->sleep_mode_switch_ = sw;
+  if (this->sleep_mode_switch_ != nullptr) {
+    this->sleep_mode_switch_->publish_state(this->get_sleep_mode_state());
   }
 }
 void AirtonClimate::set_display_switch(switch_::Switch *sw) {
@@ -187,7 +187,7 @@ uint8_t AirtonClimate::operation_settings_() {
   if (this->get_display_state()) {  // Set LED display
     settings |= (1 << 7);
   }
-  if (this->get_sleep_state()) {  // Set sleep mode
+  if (this->get_sleep_mode_state()) {  // Set sleep mode
     settings |= (1 << 1);
   }
   settings |= 0b01000100;  // Set Health and NotAutoOn bits as per default
@@ -265,7 +265,7 @@ bool AirtonClimate::parse_state_frame_(uint8_t const frame[]) {
   this->set_display_state(display_light != 0);
 
   uint8_t sleep_mode = frame[5] & 0b00000010;  // Mask anything but the second bit
-  this->set_sleep_state(sleep_mode != 0);
+  this->set_sleep_mode_state(sleep_mode != 0);
 
   this->publish_state();
   return true;
