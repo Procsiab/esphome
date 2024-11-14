@@ -10,6 +10,7 @@ airton_ns = cg.esphome_ns.namespace("airton")
 AirtonClimate = airton_ns.class_("AirtonClimate", climate_ir.ClimateIR)
 
 CONF_AIRTON_ID = "airton_id"
+CONF_SLEEP_MODE = "sleep_mode"
 
 CONFIG_SCHEMA = climate_ir.CLIMATE_IR_WITH_RECEIVER_SCHEMA.extend(
     {

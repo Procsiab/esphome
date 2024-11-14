@@ -3,11 +3,9 @@ from esphome.components import switch
 import esphome.config_validation as cv
 from esphome.const import CONF_DISPLAY, ENTITY_CATEGORY_CONFIG
 
-from ..climate import CONF_AIRTON_ID, AirtonClimate, airton_ns
+from ..climate import CONF_AIRTON_ID, CONF_SLEEP_MODE, AirtonClimate, airton_ns
 
 CODEOWNERS = ["@procsiab"]
-
-CONF_SLEEP_MODE = "sleep"
 
 SleepSwitch = airton_ns.class_("SleepSwitch", switch.Switch)
 DisplaySwitch = airton_ns.class_("DisplaySwitch", switch.Switch)
